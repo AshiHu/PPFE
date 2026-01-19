@@ -1,100 +1,120 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
+using System.Collections;
 
-[RequireComponent(typeof(Rigidbody))]
-public class TPSController : MonoBehaviour
+[RequireComponent(typeof(CharacterController))]
+public class PlayerControllerAdvanced : MonoBehaviour
 {
-    [Header("Movement Settings")]
-    public float speed = 5f;
-    public float jumpForce = 5f;
+    [Header("Références")]
+    public Transform cameraPivot; // <-- DRAG CameraPivot ICI
 
-    [Header("Camera Settings")]
-    public Transform cameraPivot;       // Empty pivot au centre du joueur
-    public Transform playerCamera;      // La caméra attachée au pivot
-    public Vector3 cameraOffset = new Vector3(0, 2f, -4f);
-    public float mouseSensitivity = 100f;
-    public float maxLookAngle = 45f;
+    [Header("Vitesse")]
+    public float walkSpeed = 5f;
+    public float sprintSpeed = 10f;
+    public float slideSpeed = 15f;
+    public float jumpHeight = 2f;
+    public float gravity = -9.81f;
 
-    private Rigidbody rb;
-    private float pitch = 20f;          // angle vertical initial
-    private float yaw = 0f;
+    [Header("Glissade")]
+    public float slideDuration = 0.8f;
+    private bool isSliding = false;
+
+    [Header("Contrôles")]
+    public KeyCode sprintKey = KeyCode.LeftShift;
+    public KeyCode slideKey = KeyCode.LeftControl;
+    public KeyCode jumpKey = KeyCode.Space;
+
+    [Header("Animations")]
+    public Animator animator;
+
+    private CharacterController controller;
+    private Vector3 velocity;
+    private bool isGrounded;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
-        rb.freezeRotation = true;
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        controller = GetComponent<CharacterController>();
     }
 
     void Update()
     {
-        HandleMouseLook();
-        HandleJump();
-    }
+        // Sol
+        isGrounded = controller.isGrounded;
+        if (isGrounded && velocity.y < 0)
+            velocity.y = -2f;
 
-    void FixedUpdate()
-    {
-        HandleMovement();
-    }
+        // Inputs
+        float moveX = Input.GetAxis("Horizontal"); // Q / D
+        float moveZ = Input.GetAxis("Vertical");   // Z / S
 
-    // ----- MOUSE LOOK -----
-    private void HandleMouseLook()
-    {
-        var mouse = Mouse.current;
-        if (mouse == null) return;
+        // Directions caméra
+        Vector3 camForward = cameraPivot.forward;
+        Vector3 camRight = cameraPivot.right;
 
-        float mouseX = mouse.delta.x.ReadValue() * mouseSensitivity * Time.deltaTime;
-        float mouseY = mouse.delta.y.ReadValue() * mouseSensitivity * Time.deltaTime;
+        camForward.y = 0f;
+        camRight.y = 0f;
+        camForward.Normalize();
+        camRight.Normalize();
 
-        yaw += mouseX;                      // rotation horizontale autour du joueur
-        pitch -= mouseY;                    // rotation verticale de la caméra
-        pitch = Mathf.Clamp(pitch, -maxLookAngle, maxLookAngle);
+        // Mouvement relatif à la caméra
+        Vector3 move = camForward * moveZ + camRight * moveX;
 
-        // On place le pivot au joueur
-        cameraPivot.position = transform.position + Vector3.up * 1.5f;
+        // Vitesse
+        float currentSpeed = walkSpeed;
 
-        // Rotation du pivot (yaw)
-        cameraPivot.rotation = Quaternion.Euler(0, yaw, 0);
-
-        // Position de la caméra relative au pivot
-        playerCamera.localPosition = cameraOffset;
-
-        // Pitch vertical de la caméra
-        playerCamera.localRotation = Quaternion.Euler(pitch, 0, 0);
-    }
-
-    // ----- PLAYER MOVEMENT -----
-    private void HandleMovement()
-    {
-        var keyboard = Keyboard.current;
-        if (keyboard == null) return;
-
-        float moveX = 0f;
-        float moveZ = 0f;
-
-        if (keyboard.aKey.isPressed) moveX = -1f;
-        if (keyboard.dKey.isPressed) moveX = 1f;
-        if (keyboard.wKey.isPressed) moveZ = 1f;
-        if (keyboard.sKey.isPressed) moveZ = -1f;
-
-        Vector3 move = transform.right * moveX + transform.forward * moveZ;
-        move.Normalize();
-
-        Vector3 velocity = move * speed;
-        velocity.y = rb.linearVelocity.y;
-        rb.linearVelocity = velocity;
-    }
-
-    // ----- JUMP -----
-    private void HandleJump()
-    {
-        var keyboard = Keyboard.current;
-        if (keyboard == null) return;
-
-        if (keyboard.spaceKey.wasPressedThisFrame && Mathf.Abs(rb.linearVelocity.y) < 0.01f)
+        if (!isSliding)
         {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            if (Input.GetKey(sprintKey) && move.magnitude > 0.1f)
+                currentSpeed = sprintSpeed;
+
+            if (Input.GetKeyDown(slideKey) && move.magnitude > 0.1f)
+                StartCoroutine(Slide());
         }
+        else
+        {
+            currentSpeed = slideSpeed;
+        }
+
+        // Déplacement
+        controller.Move(move * currentSpeed * Time.deltaTime);
+
+        // Rotation du joueur vers la direction du mouvement (TPS PRO)
+        if (move.magnitude > 0.1f)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(move);
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRot,
+                10f * Time.deltaTime
+            );
+        }
+
+        // Saut
+        if (Input.GetKeyDown(jumpKey) && isGrounded && !isSliding)
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+
+        // Gravité
+        velocity.y += gravity * Time.deltaTime;
+        controller.Move(velocity * Time.deltaTime);
+
+        // Animations
+        if (animator)
+        {
+            animator.SetFloat("Speed", move.magnitude * currentSpeed);
+            animator.SetBool("IsGrounded", isGrounded);
+            animator.SetBool("IsSliding", isSliding);
+            animator.SetFloat("VerticalVelocity", velocity.y);
+        }
+    }
+
+    private IEnumerator Slide()
+    {
+        isSliding = true;
+        float originalHeight = controller.height;
+        controller.height = originalHeight / 2f;
+
+        yield return new WaitForSeconds(slideDuration);
+
+        controller.height = originalHeight;
+        isSliding = false;
     }
 }
