@@ -243,6 +243,7 @@ GameObject:
   - component: {fileID: 330585545}
   - component: {fileID: 330585544}
   - component: {fileID: 330585547}
+  - component: {fileID: 330585548}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -318,11 +319,11 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.0718419, y: -0.0000015177789, z: 0.00000015092519, w: 0.9974161}
-  m_LocalPosition: {x: 0, y: 0.84592557, z: -5.0153613}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0.67540044, z: -10.602723}
+  m_LocalScale: {x: 1.7012008, y: 0.8087367, z: 2.039836}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1564089973}
+  m_Father: {fileID: 1604083023}
   m_LocalEulerAnglesHint: {x: 10, y: 0, z: 0}
 --- !u!114 &330585547
 MonoBehaviour:
@@ -368,6 +369,22 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &330585548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330585543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a187cb54aac5d324fa93abe2433a596d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraLook
+  sensitivity: 3
+  minY: -40
+  maxY: 70
+  smoothSpeed: 10
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -829,12 +846,11 @@ Transform:
   m_GameObject: {fileID: 1564089972}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.02741162}
-  m_LocalScale: {x: 1.701201, y: 0.7984159, z: 2.1085842}
+  m_LocalPosition: {x: 0, y: 1, z: -2.613}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 330585546}
-  m_Father: {fileID: 1604083023}
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1564089974
 MonoBehaviour:
@@ -843,12 +859,11 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1564089972}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a187cb54aac5d324fa93abe2433a596d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraLook
-  player: {fileID: 1604083023}
   sensitivity: 3
   minY: -40
   maxY: 70
@@ -967,7 +982,7 @@ Transform:
   m_LocalScale: {x: 0.58782, y: 1.25248, z: 0.4742519}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1564089973}
+  - {fileID: 330585546}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1604083024
@@ -1183,6 +1198,7 @@ MeshFilter:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 1564089973}
   - {fileID: 410087041}
   - {fileID: 832575519}
   - {fileID: 555721831}
