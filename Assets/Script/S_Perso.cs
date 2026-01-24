@@ -2,32 +2,31 @@ using UnityEngine;
 using System.Collections;
 
 [RequireComponent(typeof(CharacterController))]
-public class PlayerControllerAdvanced : MonoBehaviour
+public class PlayerMovementCustomKeys : MonoBehaviour
 {
-    [Header("Références")]
-    public Transform cameraPivot; // <-- DRAG CameraPivot ICI
-
     [Header("Vitesse")]
-    public float walkSpeed = 5f;
-    public float sprintSpeed = 10f;
+    public float moveSpeed = 8f;
     public float slideSpeed = 15f;
-    public float jumpHeight = 2f;
-    public float gravity = -9.81f;
+    public float jumpHeight = 2.2f;
+    public float gravity = -20f;
 
     [Header("Glissade")]
     public float slideDuration = 0.8f;
     private bool isSliding = false;
+    private Vector3 slideDirection;
 
     [Header("Contrôles")]
-    public KeyCode sprintKey = KeyCode.LeftShift;
     public KeyCode slideKey = KeyCode.LeftControl;
     public KeyCode jumpKey = KeyCode.Space;
 
-    [Header("Animations")]
-    public Animator animator;
+    // **Touches de déplacement personnalisables**
+    public KeyCode forwardKey = KeyCode.Z;   // Z ou W
+    public KeyCode backwardKey = KeyCode.S;
+    public KeyCode leftKey = KeyCode.Q;      // Q ou A
+    public KeyCode rightKey = KeyCode.D;
 
     private CharacterController controller;
-    private Vector3 velocity;
+    [HideInInspector] public Vector3 velocity;
     private bool isGrounded;
 
     void Start()
@@ -37,73 +36,54 @@ public class PlayerControllerAdvanced : MonoBehaviour
 
     void Update()
     {
-        // Sol
+        HandleMovement();
+    }
+
+    void HandleMovement()
+    {
+        // --- Check sol ---
         isGrounded = controller.isGrounded;
         if (isGrounded && velocity.y < 0)
             velocity.y = -2f;
 
-        // Inputs
-        float moveX = Input.GetAxis("Horizontal"); // Q / D
-        float moveZ = Input.GetAxis("Vertical");   // Z / S
+        // --- INPUTS personnalisables ---
+        float inputX = 0f;
+        float inputZ = 0f;
 
-        // Directions caméra
-        Vector3 camForward = cameraPivot.forward;
-        Vector3 camRight = cameraPivot.right;
+        if (Input.GetKey(forwardKey)) inputZ += 1f;
+        if (Input.GetKey(backwardKey)) inputZ -= 1f;
+        if (Input.GetKey(rightKey)) inputX += 1f;
+        if (Input.GetKey(leftKey)) inputX -= 1f;
 
-        camForward.y = 0f;
-        camRight.y = 0f;
-        camForward.Normalize();
-        camRight.Normalize();
+        // Déplacement relatif au joueur
+        Vector3 move = transform.right * inputX + transform.forward * inputZ;
+        move = Vector3.ClampMagnitude(move, 1f);
 
-        // Mouvement relatif à la caméra
-        Vector3 move = camForward * moveZ + camRight * moveX;
+        float currentSpeed = moveSpeed;
 
-        // Vitesse
-        float currentSpeed = walkSpeed;
-
-        if (!isSliding)
+        // GLISSADE
+        if (isSliding)
         {
-            if (Input.GetKey(sprintKey) && move.magnitude > 0.1f)
-                currentSpeed = sprintSpeed;
-
-            if (Input.GetKeyDown(slideKey) && move.magnitude > 0.1f)
-                StartCoroutine(Slide());
+            controller.Move(slideDirection * slideSpeed * Time.deltaTime);
         }
         else
         {
-            currentSpeed = slideSpeed;
+            controller.Move(move * currentSpeed * Time.deltaTime);
+
+            if (Input.GetKeyDown(slideKey) && move.magnitude > 0.1f)
+            {
+                slideDirection = move.normalized;
+                StartCoroutine(Slide());
+            }
         }
 
-        // Déplacement
-        controller.Move(move * currentSpeed * Time.deltaTime);
-
-        // Rotation du joueur vers la direction du mouvement (TPS PRO)
-        if (move.magnitude > 0.1f)
-        {
-            Quaternion targetRot = Quaternion.LookRotation(move);
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                targetRot,
-                10f * Time.deltaTime
-            );
-        }
-
-        // Saut
+        // SAUT
         if (Input.GetKeyDown(jumpKey) && isGrounded && !isSliding)
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
 
-        // Gravité
+        // GRAVITÉ
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
-
-        // Animations
-        if (animator)
-        {
-            animator.SetFloat("Speed", move.magnitude * currentSpeed);
-            animator.SetBool("IsGrounded", isGrounded);
-            animator.SetBool("IsSliding", isSliding);
-            animator.SetFloat("VerticalVelocity", velocity.y);
-        }
     }
 
     private IEnumerator Slide()
