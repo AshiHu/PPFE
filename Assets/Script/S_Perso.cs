@@ -19,11 +19,14 @@ public class PlayerMovementCustomKeys : MonoBehaviour
     public KeyCode slideKey = KeyCode.LeftControl;
     public KeyCode jumpKey = KeyCode.Space;
 
-    // **Touches de déplacement personnalisables**
-    public KeyCode forwardKey = KeyCode.Z;   // Z ou W
+    [Header("Touches de déplacement")]
+    public KeyCode forwardKey = KeyCode.Z;
     public KeyCode backwardKey = KeyCode.S;
-    public KeyCode leftKey = KeyCode.Q;      // Q ou A
+    public KeyCode leftKey = KeyCode.Q;
     public KeyCode rightKey = KeyCode.D;
+
+    [Header("Gravité")]
+    public GravityManager gravityManager;
 
     private CharacterController controller;
     [HideInInspector] public Vector3 velocity;
@@ -41,12 +44,14 @@ public class PlayerMovementCustomKeys : MonoBehaviour
 
     void HandleMovement()
     {
-        // --- Check sol ---
+        // --- SOL (basé sur la gravité actuelle) ---
         isGrounded = controller.isGrounded;
-        if (isGrounded && velocity.y < 0)
-            velocity.y = -2f;
+        if (isGrounded && Vector3.Dot(velocity, gravityManager.gravityDirection) > 0f)
+        {
+            velocity = Vector3.ProjectOnPlane(velocity, gravityManager.gravityDirection);
+        }
 
-        // --- INPUTS personnalisables ---
+        // --- INPUTS ---
         float inputX = 0f;
         float inputZ = 0f;
 
@@ -55,13 +60,17 @@ public class PlayerMovementCustomKeys : MonoBehaviour
         if (Input.GetKey(rightKey)) inputX += 1f;
         if (Input.GetKey(leftKey)) inputX -= 1f;
 
-        // Déplacement relatif au joueur
-        Vector3 move = transform.right * inputX + transform.forward * inputZ;
+        // --- DÉPLACEMENT PARALLÈLE AU SOL ---
+        Vector3 gravityDir = gravityManager.gravityDirection;
+        Vector3 moveForward = Vector3.ProjectOnPlane(transform.forward, gravityDir).normalized;
+        Vector3 moveRight = Vector3.ProjectOnPlane(transform.right, gravityDir).normalized;
+
+        Vector3 move = moveRight * inputX + moveForward * inputZ;
         move = Vector3.ClampMagnitude(move, 1f);
 
         float currentSpeed = moveSpeed;
 
-        // GLISSADE
+        // --- GLISSADE ---
         if (isSliding)
         {
             controller.Move(slideDirection * slideSpeed * Time.deltaTime);
@@ -77,18 +86,21 @@ public class PlayerMovementCustomKeys : MonoBehaviour
             }
         }
 
-        // SAUT
+        // --- SAUT (opposé à la gravité) ---
         if (Input.GetKeyDown(jumpKey) && isGrounded && !isSliding)
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        {
+            velocity = -gravityDir * Mathf.Sqrt(jumpHeight * -2f * gravity);
+        }
 
-        // GRAVITÉ
-        velocity.y += gravity * Time.deltaTime;
+        // --- GRAVITÉ DIRECTIONNELLE ---
+        velocity += gravityDir * gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
     }
 
     private IEnumerator Slide()
     {
         isSliding = true;
+
         float originalHeight = controller.height;
         controller.height = originalHeight / 2f;
 

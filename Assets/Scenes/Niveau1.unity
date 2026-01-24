@@ -1106,9 +1106,9 @@ GameObject:
   - component: {fileID: 1604083022}
   - component: {fileID: 1604083021}
   - component: {fileID: 1604083020}
-  - component: {fileID: 1604083025}
   - component: {fileID: 1604083027}
   - component: {fileID: 1604083026}
+  - component: {fileID: 1604083028}
   m_Layer: 0
   m_Name: Perso
   m_TagString: Untagged
@@ -1208,35 +1208,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 330585546}
+  - {fileID: 1700970504}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &1604083025
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1604083019}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 112
-  m_CollisionDetection: 0
 --- !u!143 &1604083026
 CharacterController:
   m_ObjectHideFlags: 0
@@ -1285,7 +1259,55 @@ MonoBehaviour:
   backwardKey: 115
   leftKey: 113
   rightKey: 100
+  gravityManager: {fileID: 1604083028}
   velocity: {x: 0, y: 0, z: 0}
+--- !u!114 &1604083028
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1604083019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99840e24527077d4fbc2c34f7653436f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GravityManager
+  player: {fileID: 1604083023}
+  feetAnchor: {fileID: 1700970504}
+  movement: {fileID: 1604083027}
+  gravityDirection: {x: 0, y: -1, z: 0}
+--- !u!1 &1700970503
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1700970504}
+  m_Layer: 0
+  m_Name: Pied
+  m_TagString: Untagged
+  m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1700970504
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1700970503}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1604083023}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1709475609
 GameObject:
   m_ObjectHideFlags: 0
@@ -1753,6 +1775,9 @@ MonoBehaviour:
   arrowLeft: {fileID: 1492874573}
   arrowRight: {fileID: 1728023189}
   openWheelKey: 101
+  slowTimeScale: 0.2
+  mouseLookScript: {fileID: 330585548}
+  gravityManager: {fileID: 1604083028}
 --- !u!4 &1989851937
 Transform:
   m_ObjectHideFlags: 0

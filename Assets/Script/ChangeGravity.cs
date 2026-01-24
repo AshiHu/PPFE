@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class GravityWheelSimple : MonoBehaviour
 {
@@ -12,48 +11,94 @@ public class GravityWheelSimple : MonoBehaviour
     [Header("Clé pour ouvrir la roue")]
     public KeyCode openWheelKey = KeyCode.E;
 
+    [Header("Temps")]
+    public float slowTimeScale = 0.2f;
+
+    [Header("Références")]
+    public MonoBehaviour mouseLookScript;   // Script MouseLook
+    public GravityManager gravityManager;   // Script annexe gravité
+
     private bool wheelOpen = false;
+    private float originalTimeScale;
 
     void Update()
     {
         // Ouvrir / fermer la roue
         if (Input.GetKeyDown(openWheelKey))
         {
-            wheelOpen = !wheelOpen;
-            SetArrowVisibility(wheelOpen);
-
-            Cursor.lockState = wheelOpen ? CursorLockMode.None : CursorLockMode.Locked;
-            Cursor.visible = wheelOpen;
+            if (!wheelOpen)
+                OpenWheel();
+            else
+                CloseWheel();
         }
 
         if (!wheelOpen) return;
 
-        // Cliquer sur les flèches pour sélectionner la direction
+        // Sélection avec clic gauche
         if (Input.GetMouseButtonDown(0))
         {
             Vector2 mousePos = Input.mousePosition;
 
             if (IsMouseOver(arrowUp, mousePos))
             {
-                Debug.Log("Haut sélectionné !");
+                gravityManager.SetGravityUp();
                 CloseWheel();
             }
             else if (IsMouseOver(arrowDown, mousePos))
             {
-                Debug.Log("Bas sélectionné !");
+                gravityManager.SetGravityDown();
                 CloseWheel();
             }
             else if (IsMouseOver(arrowLeft, mousePos))
             {
-                Debug.Log("Gauche sélectionné !");
+                gravityManager.SetGravityLeft();
                 CloseWheel();
             }
             else if (IsMouseOver(arrowRight, mousePos))
             {
-                Debug.Log("Droite sélectionné !");
+                gravityManager.SetGravityRight();
                 CloseWheel();
             }
         }
+    }
+
+    void OpenWheel()
+    {
+        wheelOpen = true;
+
+        // UI
+        SetArrowVisibility(true);
+
+        // Temps ralenti
+        originalTimeScale = Time.timeScale;
+        Time.timeScale = slowTimeScale;
+
+        // Bloquer la vue
+        if (mouseLookScript != null)
+            mouseLookScript.enabled = false;
+
+        // Curseur libre
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+
+    void CloseWheel()
+    {
+        wheelOpen = false;
+
+        // UI
+        SetArrowVisibility(false);
+
+        // Temps normal
+        Time.timeScale = originalTimeScale;
+
+        // Réactiver la vue
+        if (mouseLookScript != null)
+            mouseLookScript.enabled = true;
+
+        // Curseur verrouillé
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     private bool IsMouseOver(GameObject uiElement, Vector2 mousePos)
@@ -64,7 +109,14 @@ public class GravityWheelSimple : MonoBehaviour
         Vector2 pos = rt.position;
         Vector2 size = rt.sizeDelta;
 
-        Rect rect = new Rect(pos.x - size.x / 2, pos.y - size.y / 2, size.x, size.y);
+        Rect rect = new Rect(
+            pos.x - size.x / 2f,
+            pos.y - size.y / 2f,
+            size.x,
+            size.y
+
+        );
+
         return rect.Contains(mousePos);
     }
 
@@ -74,13 +126,5 @@ public class GravityWheelSimple : MonoBehaviour
         arrowDown.SetActive(visible);
         arrowLeft.SetActive(visible);
         arrowRight.SetActive(visible);
-    }
-
-    private void CloseWheel()
-    {
-        wheelOpen = false;
-        SetArrowVisibility(false);
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
     }
 }

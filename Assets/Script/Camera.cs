@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class MouseLookSmooth : MonoBehaviour
+public class MouseLook : MonoBehaviour
 {
     public Transform playerBody;      // le corps du joueur
     public Transform cameraTransform;  // la caméra FPS
