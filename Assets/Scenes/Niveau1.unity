@@ -199,7 +199,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: a4f6a215dd769084f9de4742d213e840, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -384,7 +384,6 @@ MonoBehaviour:
   playerBody: {fileID: 1604083023}
   cameraTransform: {fileID: 330585546}
   mouseSensitivity: 2
-  smoothSpeed: 10
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -813,7 +812,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 6f1e029a9ed273d4b9c505a6aeef1204, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -925,7 +924,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: f1d28274c1c52c744b443dbc81c48553, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1109,7 +1108,7 @@ GameObject:
   - component: {fileID: 1604083027}
   - component: {fileID: 1604083026}
   - component: {fileID: 1604083028}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Perso
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1249,16 +1248,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerControllerSpeedrunInput
   moveSpeed: 8
-  slideSpeed: 15
   jumpHeight: 3
-  gravity: -20
+  gravityValue: -20
+  slideSpeed: 15
   slideDuration: 0.8
-  slideKey: 306
+  verticalAxis: Vertical
+  horizontalAxis: Horizontal
   jumpKey: 32
-  forwardKey: 122
-  backwardKey: 115
-  leftKey: 113
-  rightKey: 100
+  slideKey: 306
+  groundCheckRadius: 0.5
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 55
   gravityManager: {fileID: 1604083028}
   velocity: {x: 0, y: 0, z: 0}
 --- !u!114 &1604083028
@@ -1274,9 +1275,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GravityManager
   player: {fileID: 1604083023}
-  feetAnchor: {fileID: 1700970504}
   movement: {fileID: 1604083027}
-  gravityDirection: {x: 0, y: -1, z: 0}
+  transitionDuration: 0.6
+  rotationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  gravityDirection: {x: 0, y: 1, z: 0}
 --- !u!1 &1700970503
 GameObject:
   m_ObjectHideFlags: 0
@@ -1301,8 +1326,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1700970503}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.5, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.4999998, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1467,7 +1492,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 4d3823ddc66aceb4b82d132cc0f9cb84, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -2,19 +2,16 @@ using UnityEngine;
 
 public class MouseLook : MonoBehaviour
 {
-    public Transform playerBody;      // le corps du joueur
-    public Transform cameraTransform;  // la caméra FPS
+    public Transform playerBody;      // Le corps du joueur (Parent)
+    public Transform cameraTransform;  // La caméra (Enfant)
     public float mouseSensitivity = 2f;
-    public float smoothSpeed = 10f;    // vitesse de lissage
 
     private float xRotation = 0f;
-    private Quaternion targetCameraRotation;
 
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        targetCameraRotation = cameraTransform.localRotation;
     }
 
     void Update()
@@ -22,20 +19,14 @@ public class MouseLook : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 
-        // Rotation horizontale du joueur
+        // 1. Rotation Horizontale : On tourne autour de l'axe Y LOCAL du joueur.
+        // C'est ça qui empêche de se retrouver la tête à l'envers.
         playerBody.Rotate(Vector3.up * mouseX);
 
-        // Rotation verticale de la caméra
+        // 2. Rotation Verticale : On incline la caméra localement
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-        targetCameraRotation = Quaternion.Euler(xRotation, 0f, 0f);
-
-        // Lissage de la rotation
-        cameraTransform.localRotation = Quaternion.Slerp(
-            cameraTransform.localRotation,
-            targetCameraRotation,
-            smoothSpeed * Time.deltaTime
-        );
+        cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
     }
 }
